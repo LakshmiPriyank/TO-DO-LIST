@@ -1,0 +1,68 @@
+index.html                                                                                                                                                                                                                                                                                         <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task To Do</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <h1>Task To Do</h1>
+    
+    <form id="taskForm">
+        <input type="text" id="taskDesc" placeholder="Task Description" required>
+        <button type="submit">Add Task</button>
+    </form>
+
+    <h2>Tasks</h2>
+    <ul id="taskList"></ul>
+
+    <h2>Mark Task as Finished</h2>
+    <form id="finishTaskForm">
+        <input type="number" id="taskId" placeholder="Task ID" required>
+        <button type="submit">Finish Task</button>
+    </form>
+
+    <script>
+        async function fetchTasks() {
+            const response = await fetch('/tasks');
+            const tasks = await response.json();
+            const taskList = document.getElementById('taskList');
+            taskList.innerHTML = '';
+            tasks.forEach((task, index) => {
+                const li = document.createElement('li');
+                li.textContent = ID: ${index}, Description: ${task[0]}, Status: ${task[1] === 0 ? 'Pending' : 'Finished'};
+                taskList.appendChild(li);
+            });
+        }
+
+        document.getElementById('taskForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const desc = document.getElementById('taskDesc').value;
+            const response = await fetch('/tasks', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ desc }),
+            });
+            const data = await response.json();
+            console.log(data);
+            await fetchTasks(); // Refresh task list
+        });
+
+        document.getElementById('finishTaskForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('taskId').value;
+            const response = await fetch(/tasks/finish/${id}, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+            });
+            const data = await response.json();
+            console.log(data);
+            await fetchTasks(); // Refresh task list
+        });
+
+        // Initial load of tasks
+        fetchTasks();
+    </script>
+</body>
+</html>
